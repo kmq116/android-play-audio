@@ -109,7 +109,7 @@ public class MainActivity extends AppCompatActivity {
         audioTrack.play();
 
         // 读取raw资源文件
-        InputStream inputStream = getResources().openRawResource(R.raw.test);
+        InputStream inputStream = getResources().openRawResource(R.raw.sample);
         byte[] buffer = new byte[bufferSize];
         int read;
 

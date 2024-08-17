@@ -16,6 +16,9 @@ import androidx.navigation.ui.NavigationUI;
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioTrack;
+import android.view.View;
+import android.widget.Button;
+
 import com.example.rawaudioplay.databinding.ActivityMainBinding;
 import java.io.IOException;
 import java.io.InputStream;
@@ -23,13 +26,20 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivity";
     private AudioTrack audioTrack;
+    private Button playButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        playRawAudio();
+        playButton = findViewById(R.id.playButton);
+        playButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // 替换为你的音频文件的网络地址
+               playRawAudio();
+            }
+        });
     }
 
     private void playRawAudio() {

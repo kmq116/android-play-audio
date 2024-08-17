@@ -31,11 +31,32 @@
         app:layout_constraintTop_toTopOf="parent"
         app:navGraph="@navigation/mobile_navigation" />
 
-    <Button
-        android:id="@+id/playButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="点击播放"
-        android:layout_centerInParent="true"/>
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <Button
+            android:id="@+id/playButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="点击播放"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="16dp" />
+
+        <Button
+            android:id="@+id/startRecorder"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="点击录制"
+            android:layout_below="@id/playButton"
+            android:layout_centerHorizontal="true" />
+
+        <Button
+            android:id="@+id/stopButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="停止录音"/>
+    </RelativeLayout>
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

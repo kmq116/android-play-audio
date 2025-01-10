@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.media.AudioRecord;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.media.AudioFormat;
 import android.media.AudioManager;
@@ -25,17 +26,13 @@ import android.media.AudioTrack;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
-
-import com.example.rawaudioplay.databinding.ActivityMainBinding;
-
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import android.media.MediaPlayer;
+import android.widget.SeekBar;
+import android.os.Handler;
 import android.widget.Toast;
 import android.media.MediaRecorder;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
@@ -49,6 +46,12 @@ public class MainActivity extends AppCompatActivity {
 
     private MediaPlayer mediaPlayer;
     private String audioFilePath; // 用于存储录音文件的路径
+
+    private SeekBar playbackSeekBar;
+    private TextView currentTimeText;
+    private TextView totalTimeText;
+    private Handler handler = new Handler();
+    private boolean isTracking = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -114,6 +117,35 @@ public class MainActivity extends AppCompatActivity {
         // 初始状态设置
         stopRecorder.setEnabled(false);  // 初始时停止按钮不可用
         
+        // 初始化新控件
+        playbackSeekBar = findViewById(R.id.playbackSeekBar);
+        currentTimeText = findViewById(R.id.currentTimeText);
+        totalTimeText = findViewById(R.id.totalTimeText);
+        
+        // 设置 SeekBar 监听器
+        playbackSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                if (fromUser && mediaPlayer != null) {
+                    updateCurrentTimeText(progress);
+                }
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+                isTracking = true;
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                if (mediaPlayer != null) {
+                    mediaPlayer.seekTo(seekBar.getProgress());
+                }
+                isTracking = false;
+            }
+        });
+        
+        // 修改播放按钮的点击事件
         playButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -130,15 +162,22 @@ public class MainActivity extends AppCompatActivity {
                         }
                         mediaPlayer = new MediaPlayer();
                         mediaPlayer.setDataSource(audioFilePath);
-                        mediaPlayer.prepareAsync(); // 使用异步准备
-                        
+                        mediaPlayer.prepareAsync();
+
                         mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
                             @Override
                             public void onPrepared(MediaPlayer mp) {
+                                // 设置进度条最大值
+                                playbackSeekBar.setMax(mp.getDuration());
+                                // 设置总时长
+                                updateTotalTimeText(mp.getDuration());
+                                // 开始播放
                                 mp.start();
+                                // 开始更新进度
+                                startProgressUpdate();
                             }
                         });
-                        
+
                         // 播放完成后释放资源
                         mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                             @Override
@@ -209,9 +248,40 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    // 添加更新进度的方法
+    private void startProgressUpdate() {
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if (mediaPlayer != null && mediaPlayer.isPlaying() && !isTracking) {
+                    int currentPosition = mediaPlayer.getCurrentPosition();
+                    playbackSeekBar.setProgress(currentPosition);
+                    updateCurrentTimeText(currentPosition);
+                    handler.postDelayed(this, 100); // 每100ms更新一次
+                }
+            }
+        }, 100);
+    }
+
+    // 格式化时间显示
+    private void updateCurrentTimeText(int milliseconds) {
+        currentTimeText.setText(formatTime(milliseconds));
+    }
+
+    private void updateTotalTimeText(int milliseconds) {
+        totalTimeText.setText(formatTime(milliseconds));
+    }
+
+    private String formatTime(int milliseconds) {
+        int seconds = (milliseconds / 1000) % 60;
+        int minutes = (milliseconds / (1000 * 60)) % 60;
+        return String.format("%02d:%02d", minutes, seconds);
+    }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        handler.removeCallbacksAndMessages(null);
         if (mediaPlayer != null) {
             mediaPlayer.release();
             mediaPlayer = null;

@@ -24,6 +24,7 @@ import android.media.AudioManager;
 import android.media.AudioTrack;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 
 import com.example.rawaudioplay.databinding.ActivityMainBinding;
 
@@ -39,6 +40,8 @@ public class MainActivity extends AppCompatActivity {
     private Button stopRecorder;
 
     private Button playButton;
+    private TextView recordingStatus;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -68,12 +71,19 @@ public class MainActivity extends AppCompatActivity {
         stopRecorder = findViewById(R.id.stopButton);
         playButton = findViewById(R.id.playButton);
         startRecorder = findViewById(R.id.startRecorder);
+        recordingStatus = findViewById(R.id.recordingStatus);
+
         RawAudioRecorder recorder = new RawAudioRecorder(this);
+
         startRecorder.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // 替换为你的音频文件的网络地址
-                System.out.println("123123");
+                // 开始录音时更新UI状态
+                startRecorder.setEnabled(false);  // 禁用开始按钮
+                stopRecorder.setEnabled(true);    // 启用停止按钮
+                playButton.setEnabled(false);     // 禁用播放按钮
+                recordingStatus.setVisibility(View.VISIBLE);  // 显示录音状态
+                
                 recorder.startRecording(MainActivity.this);
             }
         });
@@ -81,11 +91,19 @@ public class MainActivity extends AppCompatActivity {
         stopRecorder.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // 替换为你的音频文件的网络地址
-                System.out.println("123123");
+                // 停止录音时更新UI状态
+                startRecorder.setEnabled(true);   // 重新启用开始按钮
+                stopRecorder.setEnabled(false);   // 禁用停止按钮
+                playButton.setEnabled(true);      // 启用播放按钮
+                recordingStatus.setVisibility(View.INVISIBLE);  // 隐藏录音状态
+                
                 recorder.stopRecording();
             }
         });
+
+        // 初始状态设置
+        stopRecorder.setEnabled(false);  // 初始时停止按钮不可用
+        
         playButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

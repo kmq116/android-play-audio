@@ -36,6 +36,19 @@
         android:layout_height="match_parent"
         android:padding="16dp">
 
+        <!-- 录音状态提示 -->
+        <TextView
+            android:id="@+id/recordingStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_above="@id/recordControlGroup"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="32dp"
+            android:textSize="18sp"
+            android:textColor="@color/purple_500"
+            android:visibility="invisible"
+            android:text="正在录音..." />
+
         <!-- 录音控制按钮组 -->
         <LinearLayout
             android:id="@+id/recordControlGroup"

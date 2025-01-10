@@ -32,6 +32,11 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import android.media.MediaPlayer;
+import android.widget.Toast;
+import android.media.MediaRecorder;
+import java.io.File;
+
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
     private AudioTrack audioTrack;
@@ -41,6 +46,9 @@ public class MainActivity extends AppCompatActivity {
 
     private Button playButton;
     private TextView recordingStatus;
+
+    private MediaPlayer mediaPlayer;
+    private String audioFilePath; // 用于存储录音文件的路径
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,6 +92,8 @@ public class MainActivity extends AppCompatActivity {
                 playButton.setEnabled(false);     // 禁用播放按钮
                 recordingStatus.setVisibility(View.VISIBLE);  // 显示录音状态
                 
+                audioFilePath = getExternalCacheDir().getAbsolutePath() + "/recorded_audio.m4a";
+                recorder.setOutputFile(audioFilePath);
                 recorder.startRecording(MainActivity.this);
             }
         });
@@ -107,8 +117,59 @@ public class MainActivity extends AppCompatActivity {
         playButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // 替换为你的音频文件的网络地址
-               playRawAudio();
+                if (audioFilePath != null) {
+                    File audioFile = new File(audioFilePath);
+                    if (!audioFile.exists()) {
+                        Toast.makeText(MainActivity.this, "录音文件不存在", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
+                    try {
+                        if (mediaPlayer != null) {
+                            mediaPlayer.release();
+                        }
+                        mediaPlayer = new MediaPlayer();
+                        mediaPlayer.setDataSource(audioFilePath);
+                        mediaPlayer.prepareAsync(); // 使用异步准备
+                        
+                        mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+                            @Override
+                            public void onPrepared(MediaPlayer mp) {
+                                mp.start();
+                            }
+                        });
+                        
+                        // 播放完成后释放资源
+                        mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                            @Override
+                            public void onCompletion(MediaPlayer mp) {
+                                mp.release();
+                                mediaPlayer = null;
+                            }
+                        });
+
+                        mediaPlayer.setOnErrorListener(new MediaPlayer.OnErrorListener() {
+                            @Override
+                            public boolean onError(MediaPlayer mp, int what, int extra) {
+                                Toast.makeText(MainActivity.this, "播放出错: " + what, Toast.LENGTH_SHORT).show();
+                                if (mp != null) {
+                                    mp.release();
+                                    mediaPlayer = null;
+                                }
+                                return true;
+                            }
+                        });
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        Toast.makeText(MainActivity.this, "播放失败: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                        if (mediaPlayer != null) {
+                            mediaPlayer.release();
+                            mediaPlayer = null;
+                        }
+                    }
+                } else {
+                    Toast.makeText(MainActivity.this, "请先录制音频", Toast.LENGTH_SHORT).show();
+                }
             }
         });
     }
@@ -145,6 +206,15 @@ public class MainActivity extends AppCompatActivity {
             }
             audioTrack.stop();
             audioTrack.release();
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (mediaPlayer != null) {
+            mediaPlayer.release();
+            mediaPlayer = null;
         }
     }
 }

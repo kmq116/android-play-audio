@@ -21,29 +21,31 @@ public class RawAudioRecorder extends AppCompatActivity {
     private boolean isRecording = false;
     private Thread recordingThread;
     private Context context;
+    private MediaRecorder mediaRecorder;
+    private String outputFile;
 
     public RawAudioRecorder(Context context) {
         this.context = context;
     }
 
-    public void startRecording(Context context) {
-
-        int bufferSize = AudioRecord.getMinBufferSize(SAMPLE_RATE, CHANNEL_CONFIG, AUDIO_FORMAT);
-        audioRecord = new AudioRecord(MediaRecorder.AudioSource.MIC, SAMPLE_RATE, CHANNEL_CONFIG, AUDIO_FORMAT, bufferSize);
-
-        audioRecord.startRecording();
-        isRecording = true;
-
-        recordingThread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                System.out.println("录制中");
-                writeAudioDataToFile(context);
-            }
-        }, "AudioRecorder Thread");
-        recordingThread.start();
+    public void setOutputFile(String path) {
+        this.outputFile = path;
     }
 
+    public void startRecording(Context context) {
+        mediaRecorder = new MediaRecorder();
+        mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+        mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
+        mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
+        mediaRecorder.setOutputFile(outputFile);
+
+        try {
+            mediaRecorder.prepare();
+            mediaRecorder.start();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
     private void writeAudioDataToFile(Context context) {
         FileOutputStream os = null;
@@ -54,8 +56,6 @@ public class RawAudioRecorder extends AppCompatActivity {
         if (!appDir.exists()) {
             appDir.mkdirs(); // 创建目录
         }
-
-
 
         try {
             long lastFileCreationTime = System.currentTimeMillis();
@@ -101,19 +101,14 @@ public class RawAudioRecorder extends AppCompatActivity {
         }
     }
     public void stopRecording() {
-        isRecording = false;
-        if (audioRecord != null) {
-            audioRecord.stop();
-            audioRecord.release();
-            audioRecord = null;
-        }
-        if (recordingThread != null) {
+        if (mediaRecorder != null) {
             try {
-                recordingThread.join();
-            } catch (InterruptedException e) {
+                mediaRecorder.stop();
+                mediaRecorder.release();
+            } catch (IllegalStateException e) {
                 e.printStackTrace();
             }
-            recordingThread = null;
+            mediaRecorder = null;
         }
     }
 }

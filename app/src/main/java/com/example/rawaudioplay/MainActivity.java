@@ -37,9 +37,12 @@ import java.io.InputStream;
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
     private AudioTrack audioTrack;
+    private AudioStreamManager audioStreamManager;
 
     private Button startRecorder;
     private Button stopRecorder;
+    private Button startStreamButton;
+    private Button stopStreamButton;
 
     private Button playButton;
     private TextView recordingStatus;
@@ -79,10 +82,14 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        audioStreamManager = new AudioStreamManager(this);
+
         stopRecorder = findViewById(R.id.stopButton);
         playButton = findViewById(R.id.playButton);
         startRecorder = findViewById(R.id.startRecorder);
         recordingStatus = findViewById(R.id.recordingStatus);
+        startStreamButton = findViewById(R.id.startStreamButton);
+        stopStreamButton = findViewById(R.id.stopStreamButton);
 
         RawAudioRecorder recorder = new RawAudioRecorder(this);
 
@@ -211,6 +218,31 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+
+        startStreamButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String rtmpUrl = "rtmp://imn.tiananborui.com:1935/x";
+                String streamKey = "h77KWA6Xz9Pa";
+                // 将 streamKey 添加到 rtmpUrl 后面
+                String fullRtmpUrl = rtmpUrl + "/" + streamKey;
+                
+                audioStreamManager.startStreaming(fullRtmpUrl);
+                startStreamButton.setEnabled(false);
+                stopStreamButton.setEnabled(true);
+                Toast.makeText(MainActivity.this, "开始推流", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        stopStreamButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                audioStreamManager.stopStreaming();
+                startStreamButton.setEnabled(true);
+                stopStreamButton.setEnabled(false);
+                Toast.makeText(MainActivity.this, "停止推流", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private void playRawAudio() {
@@ -285,6 +317,9 @@ public class MainActivity extends AppCompatActivity {
         if (mediaPlayer != null) {
             mediaPlayer.release();
             mediaPlayer = null;
+        }
+        if (audioStreamManager != null) {
+            audioStreamManager.release();
         }
     }
 }

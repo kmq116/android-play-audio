@@ -7,6 +7,18 @@
     android:layout_height="match_parent"
     android:paddingTop="?attr/actionBarSize">
 
+    <fragment
+        android:id="@+id/nav_host_fragment_activity_main"
+        android:name="androidx.navigation.fragment.NavHostFragment"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:defaultNavHost="true"
+        app:layout_constraintBottom_toTopOf="@id/nav_view"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:navGraph="@navigation/mobile_navigation" />
+
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/nav_view"
         android:layout_width="0dp"
@@ -18,161 +30,5 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:menu="@menu/bottom_nav_menu" />
-
-    <fragment
-        android:id="@+id/nav_host_fragment_activity_main"
-        android:name="androidx.navigation.fragment.NavHostFragment"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:defaultNavHost="true"
-        app:layout_constraintBottom_toTopOf="@id/nav_view"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:navGraph="@navigation/mobile_navigation" />
-
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:padding="16dp">
-
-        <!-- 录音状态提示 -->
-        <TextView
-            android:id="@+id/recordingStatus"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_above="@id/recordControlGroup"
-            android:layout_centerHorizontal="true"
-            android:layout_marginBottom="32dp"
-            android:textSize="18sp"
-            android:textColor="@color/purple_500"
-            android:visibility="invisible"
-            android:text="正在录音..." />
-
-        <!-- 录音控制按钮组 -->
-        <LinearLayout
-            android:id="@+id/recordControlGroup"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_centerInParent="true"
-            android:orientation="vertical"
-            android:gravity="center">
-
-            <!-- 录音按钮 -->
-            <Button
-                android:id="@+id/startRecorder"
-                android:layout_width="200dp"
-                android:layout_height="wrap_content"
-                android:text="开始录音"
-                android:layout_marginBottom="16dp"
-                android:backgroundTint="@color/purple_500" />
-
-            <!-- 停止录音按钮 -->
-            <Button
-                android:id="@+id/stopButton"
-                android:layout_width="200dp"
-                android:layout_height="wrap_content"
-                android:text="停止录音"
-                android:layout_marginBottom="16dp"
-                android:backgroundTint="@color/teal_700" />
-
-            <!-- 播放按钮 -->
-            <Button
-                android:id="@+id/playButton"
-                android:layout_width="200dp"
-                android:layout_height="wrap_content"
-                android:text="播放录音"
-                android:backgroundTint="@color/purple_700" />
-
-            <LinearLayout
-                android:id="@+id/playbackControlGroup"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:layout_marginTop="16dp">
-                
-                <!-- 进度条 -->
-                <SeekBar
-                    android:id="@+id/playbackSeekBar"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"/>
-
-                <!-- 时间显示 -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:layout_marginTop="4dp">
-
-                    <TextView
-                        android:id="@+id/currentTimeText"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="00:00"
-                        android:textSize="12sp"/>
-
-                    <Space
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"/>
-
-                    <TextView
-                        android:id="@+id/totalTimeText"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="00:00"
-                        android:textSize="12sp"/>
-                </LinearLayout>
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center">
-
-                <Button
-                    android:id="@+id/startStreamButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="8dp"
-                    android:text="开始推流" />
-
-                <Button
-                    android:id="@+id/stopStreamButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="停止推流"
-                    android:enabled="false"
-                    android:layout_margin="8dp"/>
-
-                <Button
-                    android:id="@+id/selectBgmButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="选择背景音乐"
-                    android:layout_margin="8dp"/>
-
-                <SeekBar
-                    android:id="@+id/bgmVolumeSeekBar"
-                    android:layout_width="200dp"
-                    android:layout_height="wrap_content"
-                    android:max="100"
-                    android:progress="50"
-                    android:layout_margin="8dp"/>
-
-                <TextView
-                    android:id="@+id/bgmVolumeText"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="背景音乐音量: 50%"
-                    android:layout_margin="8dp"/>
-            </LinearLayout>
-
-        </LinearLayout>
-
-    </RelativeLayout>
-
 
 </androidx.constraintlayout.widget.ConstraintLayout>

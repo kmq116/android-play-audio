@@ -1,17 +1,8 @@
 package com.example.rawaudioplay;
 
 import android.Manifest;
-import android.content.Context;
 import android.content.pm.PackageManager;
-import android.media.AudioRecord;
-import android.media.MediaPlayer;
 import android.os.Bundle;
-import android.media.AudioFormat;
-import android.media.AudioManager;
-import android.media.AudioTrack;
-import android.os.Bundle;
-import com.google.android.material.bottomnavigation.BottomNavigationView;
-import android.util.Log;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
@@ -20,47 +11,18 @@ import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
-import android.media.AudioFormat;
-import android.media.AudioManager;
-import android.media.AudioTrack;
-import android.view.View;
-import android.widget.Button;
-import android.widget.TextView;
-import android.widget.SeekBar;
-import android.os.Handler;
-import android.widget.Toast;
-import android.media.MediaRecorder;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
+
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 public class MainActivity extends AppCompatActivity {
-    private static final String TAG = "MainActivity";
-    private AudioTrack audioTrack;
-    private AudioStreamManager audioStreamManager;
-
-    private Button startRecorder;
-    private Button stopRecorder;
-    private Button startStreamButton;
-    private Button stopStreamButton;
-
-    private Button playButton;
-    private TextView recordingStatus;
-
-    private MediaPlayer mediaPlayer;
-    private String audioFilePath; // 用于存储录音文件的路径
-
-    private SeekBar playbackSeekBar;
-    private TextView currentTimeText;
-    private TextView totalTimeText;
-    private Handler handler = new Handler();
-    private boolean isTracking = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
 
-
-        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.RECORD_AUDIO)
+        // 检查权限
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)
                 != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this,
                     new String[]{Manifest.permission.RECORD_AUDIO},
@@ -69,257 +31,18 @@ public class MainActivity extends AppCompatActivity {
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
                 != PackageManager.PERMISSION_GRANTED) {
-            // 权限未被授予，进行请求
             ActivityCompat.requestPermissions(this,
                     new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
                     1);
-        } else {
-            // 权限已经被授予，可以进行文件写入操作
         }
 
-
-
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-
-        audioStreamManager = new AudioStreamManager(this);
-
-        stopRecorder = findViewById(R.id.stopButton);
-        playButton = findViewById(R.id.playButton);
-        startRecorder = findViewById(R.id.startRecorder);
-        recordingStatus = findViewById(R.id.recordingStatus);
-        startStreamButton = findViewById(R.id.startStreamButton);
-        stopStreamButton = findViewById(R.id.stopStreamButton);
-
-        RawAudioRecorder recorder = new RawAudioRecorder(this);
-
-        startRecorder.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // 开始录音时更新UI状态
-                startRecorder.setEnabled(false);  // 禁用开始按钮
-                stopRecorder.setEnabled(true);    // 启用停止按钮
-                playButton.setEnabled(false);     // 禁用播放按钮
-                recordingStatus.setVisibility(View.VISIBLE);  // 显示录音状态
-                
-                audioFilePath = getExternalCacheDir().getAbsolutePath() + "/recorded_audio.m4a";
-                recorder.setOutputFile(audioFilePath);
-                recorder.startRecording(MainActivity.this);
-            }
-        });
-
-        stopRecorder.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // 停止录音时更新UI状态
-                startRecorder.setEnabled(true);   // 重新启用开始按钮
-                stopRecorder.setEnabled(false);   // 禁用停止按钮
-                playButton.setEnabled(true);      // 启用播放按钮
-                recordingStatus.setVisibility(View.INVISIBLE);  // 隐藏录音状态
-                
-                recorder.stopRecording();
-            }
-        });
-
-        // 初始状态设置
-        stopRecorder.setEnabled(false);  // 初始时停止按钮不可用
-        
-        // 初始化新控件
-        playbackSeekBar = findViewById(R.id.playbackSeekBar);
-        currentTimeText = findViewById(R.id.currentTimeText);
-        totalTimeText = findViewById(R.id.totalTimeText);
-        
-        // 设置 SeekBar 监听器
-        playbackSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                if (fromUser && mediaPlayer != null) {
-                    updateCurrentTimeText(progress);
-                }
-            }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-                isTracking = true;
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-                if (mediaPlayer != null) {
-                    mediaPlayer.seekTo(seekBar.getProgress());
-                }
-                isTracking = false;
-            }
-        });
-        
-        // 修改播放按钮的点击事件
-        playButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (audioFilePath != null) {
-                    File audioFile = new File(audioFilePath);
-                    if (!audioFile.exists()) {
-                        Toast.makeText(MainActivity.this, "录音文件不存在", Toast.LENGTH_SHORT).show();
-                        return;
-                    }
-
-                    try {
-                        if (mediaPlayer != null) {
-                            mediaPlayer.release();
-                        }
-                        mediaPlayer = new MediaPlayer();
-                        mediaPlayer.setDataSource(audioFilePath);
-                        mediaPlayer.prepareAsync();
-
-                        mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-                            @Override
-                            public void onPrepared(MediaPlayer mp) {
-                                // 设置进度条最大值
-                                playbackSeekBar.setMax(mp.getDuration());
-                                // 设置总时长
-                                updateTotalTimeText(mp.getDuration());
-                                // 开始播放
-                                mp.start();
-                                // 开始更新进度
-                                startProgressUpdate();
-                            }
-                        });
-
-                        // 播放完成后释放资源
-                        mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                            @Override
-                            public void onCompletion(MediaPlayer mp) {
-                                mp.release();
-                                mediaPlayer = null;
-                            }
-                        });
-
-                        mediaPlayer.setOnErrorListener(new MediaPlayer.OnErrorListener() {
-                            @Override
-                            public boolean onError(MediaPlayer mp, int what, int extra) {
-                                Toast.makeText(MainActivity.this, "播放出错: " + what, Toast.LENGTH_SHORT).show();
-                                if (mp != null) {
-                                    mp.release();
-                                    mediaPlayer = null;
-                                }
-                                return true;
-                            }
-                        });
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                        Toast.makeText(MainActivity.this, "播放失败: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                        if (mediaPlayer != null) {
-                            mediaPlayer.release();
-                            mediaPlayer = null;
-                        }
-                    }
-                } else {
-                    Toast.makeText(MainActivity.this, "请先录制音频", Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
-
-        startStreamButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String rtmpUrl = "rtmp://imn.tiananborui.com:1935/x";
-                String streamKey = "h77KWA6Xz9Pa";
-                // 将 streamKey 添加到 rtmpUrl 后面
-                String fullRtmpUrl = rtmpUrl + "/" + streamKey;
-                
-                audioStreamManager.startStreaming(fullRtmpUrl);
-                startStreamButton.setEnabled(false);
-                stopStreamButton.setEnabled(true);
-                Toast.makeText(MainActivity.this, "开始推流", Toast.LENGTH_SHORT).show();
-            }
-        });
-
-        stopStreamButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                audioStreamManager.stopStreaming();
-                startStreamButton.setEnabled(true);
-                stopStreamButton.setEnabled(false);
-                Toast.makeText(MainActivity.this, "停止推流", Toast.LENGTH_SHORT).show();
-            }
-        });
-    }
-
-    private void playRawAudio() {
-        // 音频参数
-        int sampleRate = 8000; // 采样率
-        int channelConfig = AudioFormat.CHANNEL_OUT_MONO; // 单声道
-        int audioFormat = AudioFormat.ENCODING_PCM_16BIT; // 16位PCM
-
-        // 计算缓冲区大小
-        int bufferSize = AudioTrack.getMinBufferSize(sampleRate, channelConfig, audioFormat);
-        audioTrack = new AudioTrack(AudioManager.STREAM_MUSIC, sampleRate, channelConfig, audioFormat, bufferSize, AudioTrack.MODE_STREAM);
-
-        // 开始播放
-        audioTrack.play();
-
-        // 读取raw资源文件
-        InputStream inputStream = getResources().openRawResource(R.raw.sample);
-        byte[] buffer = new byte[bufferSize];
-        int read;
-
-        try {
-            while ((read = inputStream.read(buffer)) > 0) {
-                audioTrack.write(buffer, 0, read);
-            }
-        } catch (IOException e) {
-            Log.e(TAG, "Error reading raw audio file", e);
-        } finally {
-            try {
-                inputStream.close();
-            } catch (IOException e) {
-                Log.e(TAG, "Error closing input stream", e);
-            }
-            audioTrack.stop();
-            audioTrack.release();
-        }
-    }
-
-    // 添加更新进度的方法
-    private void startProgressUpdate() {
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                if (mediaPlayer != null && mediaPlayer.isPlaying() && !isTracking) {
-                    int currentPosition = mediaPlayer.getCurrentPosition();
-                    playbackSeekBar.setProgress(currentPosition);
-                    updateCurrentTimeText(currentPosition);
-                    handler.postDelayed(this, 100); // 每100ms更新一次
-                }
-            }
-        }, 100);
-    }
-
-    // 格式化时间显示
-    private void updateCurrentTimeText(int milliseconds) {
-        currentTimeText.setText(formatTime(milliseconds));
-    }
-
-    private void updateTotalTimeText(int milliseconds) {
-        totalTimeText.setText(formatTime(milliseconds));
-    }
-
-    private String formatTime(int milliseconds) {
-        int seconds = (milliseconds / 1000) % 60;
-        int minutes = (milliseconds / (1000 * 60)) % 60;
-        return String.format("%02d:%02d", minutes, seconds);
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        handler.removeCallbacksAndMessages(null);
-        if (mediaPlayer != null) {
-            mediaPlayer.release();
-            mediaPlayer = null;
-        }
-        if (audioStreamManager != null) {
-            audioStreamManager.release();
-        }
+        // 设置底部导航
+        BottomNavigationView navView = findViewById(R.id.nav_view);
+        AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder(
+                R.id.navigation_home, R.id.navigation_vis)
+                .build();
+        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_activity_main);
+        NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
+        NavigationUI.setupWithNavController(navView, navController);
     }
 }

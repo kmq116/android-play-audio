@@ -46,4 +46,5 @@ dependencies {
     implementation 'com.github.pedroSG94.rtmp-rtsp-stream-client-java:rtplibrary:2.1.9'
     implementation 'com.github.pedroSG94.rtmp-rtsp-stream-client-java:rtmp:2.1.9'
     implementation 'com.github.pedroSG94.rtmp-rtsp-stream-client-java:encoder:2.1.9'
+    implementation 'androidx.webkit:webkit:1.6.1'
 }

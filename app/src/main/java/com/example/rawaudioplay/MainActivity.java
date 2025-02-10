@@ -39,7 +39,7 @@ public class MainActivity extends AppCompatActivity {
         // 设置底部导航
         BottomNavigationView navView = findViewById(R.id.nav_view);
         AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.navigation_home, R.id.navigation_vis)
+                R.id.navigation_home, R.id.navigation_vis, R.id.navigation_scan,R.id.navigation_calculator)
                 .build();
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_activity_main);
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);

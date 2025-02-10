@@ -9,6 +9,16 @@
     <item
         android:id="@+id/navigation_vis"
         android:icon="@drawable/ic_dashboard_black_24dp"
-        android:title="Vis" />
+        android:title="可视化" />
+
+    <item
+        android:id="@+id/navigation_scan"
+        android:icon="@drawable/ic_qr_code_scanner_24"
+        android:title="扫描" />
+
+    <item
+        android:id="@+id/navigation_calculator"
+        android:icon="@drawable/ic_qr_code_scanner_24"
+        android:title="计算器" />
 
 </menu>

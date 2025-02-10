@@ -17,4 +17,16 @@
         android:label="Vis"
         tools:layout="@layout/fragment_vis" />
 
+    <fragment
+        android:id="@+id/navigation_scan"
+        android:name="com.example.rawaudioplay.ui.scan.ScanFragment"
+        android:label="扫描二维码"
+        tools:layout="@layout/fragment_scan" />
+
+          <fragment
+        android:id="@+id/navigation_calculator"
+        android:name="com.example.rawaudioplay.ui.calc.CalcFragment"
+        android:label="计算器"
+        tools:layout="@layout/fragment_calc" />
+
 </navigation>

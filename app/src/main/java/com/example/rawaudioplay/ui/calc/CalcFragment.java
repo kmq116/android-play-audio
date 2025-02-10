@@ -17,6 +17,7 @@ public class CalcFragment extends Fragment {
     private EditText principalInput;
     private EditText rateInput;
     private EditText yearsInput;
+    private EditText monthlyInput;
     private Spinner frequencySpinner;
     private TextView resultText;
 
@@ -29,6 +30,7 @@ public class CalcFragment extends Fragment {
         principalInput = view.findViewById(R.id.principal_input);
         rateInput = view.findViewById(R.id.rate_input);
         yearsInput = view.findViewById(R.id.years_input);
+        monthlyInput = view.findViewById(R.id.monthly_input);
         frequencySpinner = view.findViewById(R.id.frequency_spinner);
         resultText = view.findViewById(R.id.result_text);
         
@@ -44,14 +46,24 @@ public class CalcFragment extends Fragment {
             double principal = Double.parseDouble(principalInput.getText().toString());
             double annualRate = Double.parseDouble(rateInput.getText().toString()) / 100;
             int years = Integer.parseInt(yearsInput.getText().toString());
+            double monthlyAddition = monthlyInput.getText().toString().isEmpty() ? 0 : 
+                Double.parseDouble(monthlyInput.getText().toString());
             
             // 获取复利频率（根据spinner位置映射到实际次数）
             int frequencyPosition = frequencySpinner.getSelectedItemPosition();
             int compoundTimes = getCompoundTimes(frequencyPosition);
+            int totalMonths = years * 12;
 
-            // 复利计算公式：A = P(1 + r/n)^(nt)
+            // 计算初始本金复利
             double amount = principal * Math.pow(1 + (annualRate / compoundTimes), 
                 compoundTimes * years);
+            
+            // 计算每月定投的复利（按月复利）
+            double monthlyRate = annualRate / 12;
+            for (int month = 1; month <= totalMonths; month++) {
+                int remainingMonths = totalMonths - month;
+                amount += monthlyAddition * Math.pow(1 + monthlyRate, remainingMonths);
+            }
 
             // 显示结果
             DecimalFormat df = new DecimalFormat("#,##0.00");

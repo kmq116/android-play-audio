@@ -49,39 +49,36 @@ public class CalcFragment extends Fragment {
             double monthlyAddition = monthlyInput.getText().toString().isEmpty() ? 0 : 
                 Double.parseDouble(monthlyInput.getText().toString());
             
-            // 获取复利频率（根据spinner位置映射到实际次数）
-            int frequencyPosition = frequencySpinner.getSelectedItemPosition();
-            int compoundTimes = getCompoundTimes(frequencyPosition);
-            int totalMonths = years * 12;
+            // 修改计算参数
+            double dailyRate = annualRate / 365; // 使用实际年天数
+            int totalDays = years * 365;
+            double currentPrincipal = principal;
 
-            // 计算初始本金复利
-            double amount = principal * Math.pow(1 + (annualRate / compoundTimes), 
-                compoundTimes * years);
-            
-            // 计算每月定投的复利（按月复利）
-            double monthlyRate = annualRate / 12;
-            for (int month = 1; month <= totalMonths; month++) {
-                int remainingMonths = totalMonths - month;
-                amount += monthlyAddition * Math.pow(1 + monthlyRate, remainingMonths);
+            // 修改计息逻辑
+            for (int day = 0; day < totalDays; day++) {
+                // 每月定投处理保持不变
+                if (day % 30 == 0 && day != 0) {
+                    currentPrincipal += monthlyAddition;
+                }
+                
+                // 每日复利计算（利息立即加入本金）
+                currentPrincipal *= (1 + dailyRate); // 替换原来的计息方式
             }
 
-            // 显示结果
+            // 计算总投入（调整计算方式）
+            int totalMonths = years * 12;
+            double totalInvestment = principal + (monthlyAddition * totalMonths);
+            
+            // 显示结果（格式调整）
             DecimalFormat df = new DecimalFormat("#,##0.00");
-            resultText.setText("到期本息和：" + df.format(amount) + "元");
+            String result = "最终本息和：" + df.format(currentPrincipal) + "元\n"
+                          + "总投入本金：" + df.format(totalInvestment) + "元\n"
+                          + "累计利息：" + df.format(currentPrincipal - totalInvestment) + "元\n"
+                          + "（按日计息，每日复利）";
+            resultText.setText(result);
             
         } catch (NumberFormatException e) {
             resultText.setText("请输入有效的数字");
-        }
-    }
-
-    // 根据spinner位置返回对应的复利次数
-    private int getCompoundTimes(int position) {
-        switch (position) {
-            case 0: return 1;    // 年
-            case 1: return 2;    // 半年
-            case 2: return 4;    // 季度
-            case 3: return 12;   // 月
-            default: return 1;
         }
     }
 }

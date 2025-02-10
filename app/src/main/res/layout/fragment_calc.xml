@@ -19,7 +19,8 @@
                 android:id="@+id/principal_input"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="numberDecimal"/>
+                android:inputType="numberDecimal"
+                android:text="1000"/>
         </com.google.android.material.textfield.TextInputLayout>
 
         <!-- 年利率输入 -->
@@ -32,7 +33,8 @@
                 android:id="@+id/rate_input"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="numberDecimal"/>
+                android:inputType="numberDecimal"
+                android:text="10"/>
         </com.google.android.material.textfield.TextInputLayout>
 
         <!-- 投资年限 -->
@@ -45,7 +47,8 @@
                 android:id="@+id/years_input"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="number"/>
+                android:inputType="number"
+                android:text="1"/>
         </com.google.android.material.textfield.TextInputLayout>
 
         <!-- 每月定投金额 -->
@@ -58,7 +61,8 @@
                 android:id="@+id/monthly_input"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="numberDecimal"/>
+                android:inputType="numberDecimal"
+                android:text="1000"/>
         </com.google.android.material.textfield.TextInputLayout>
 
         <!-- 复利频率选择 -->

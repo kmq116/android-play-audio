@@ -4,5 +4,6 @@
         <item>每年复利</item>
         <item>每季度复利</item>
         <item>每月复利</item>
+        <item>每日复利</item>
     </string-array>
 </resources> 
